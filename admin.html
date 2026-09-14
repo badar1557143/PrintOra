@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Printora mock order administration dashboard."><title>Admin Dashboard | Printora</title><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="topbar"><div class="wrap"><div>Printora mock administration</div><div class="right"><a href="index.html">← Back to storefront</a></div></div></div>
+  <header><div class="wrap header-inner"><a class="brand" href="index.html"><div class="name">Print<span class="accent">ora</span></div><div class="tag">Order management demo</div></a><nav class="mainnav" id="mainNav"><a href="index.html">Storefront</a><a href="products.html">Products</a><a href="checkout.html">Checkout</a><a href="admin.html" class="active">Admin Dashboard</a></nav><button class="hamburger" type="button" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav">☰</button></div></header>
+  <main><section class="page-hero"><div class="wrap"><span class="eyebrow">Mock operations</span><h1>Order dashboard</h1><p>View and manage orders created through the local checkout simulation.</p></div></section>
+    <section class="page-content"><div class="wrap admin-shell">
+      <div class="admin-toolbar"><div><h2>Orders</h2><p class="muted">Data is held in memory by the mock server and resets when it restarts.</p></div><button class="btn btn-line" id="refreshOrders" type="button">Refresh orders ↻</button></div>
+      <div class="admin-stats"><div><span>Total orders</span><strong id="statOrders">0</strong></div><div><span>Revenue</span><strong id="statRevenue">PKR 0</strong></div><div><span>Open orders</span><strong id="statOpen">0</strong></div><div><span>Paid / authorized</span><strong id="statPaid">0</strong></div></div>
+      <div class="admin-filters"><label for="statusFilter">Filter status</label><select id="statusFilter"><option value="all">All statuses</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select><input id="orderSearch" type="search" placeholder="Search order, name, or email"><span id="adminStatus" role="status" aria-live="polite"></span></div>
+      <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Actions</th></tr></thead><tbody id="ordersBody"><tr><td colspan="7" class="table-empty">Loading orders…</td></tr></tbody></table></div>
+    </div></section>
+  </main>
+  <script src="nav.js" defer></script>
+  <script src="admin.js" defer></script>
+</body>
+</html>
