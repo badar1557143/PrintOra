@@ -64,6 +64,57 @@ your own licensed photography into `assets/products/` and update the
   contact form and newsletter form don't send real emails. Swap these
   for real API calls when you connect a backend.
 
+## Design saved on Add to Cart / Buy Now
+
+The moment a customer taps **Add to Cart** or **Buy Now** on `customize.html`
+with a design on the canvas, `js/customize.js` auto-downloads a PNG of every
+customized side to their device (staggered ~400ms apart per file) before the
+item is written to the cart. This happens whether or not they ever reach
+checkout, so the design isn't only saved at the last step. It's in addition
+to, not instead of, the checkout-time attach/download flow below — that one
+also tags the filename with the order reference and is what actually gets
+attached to the WhatsApp message.
+
+## Checkout → WhatsApp attachments
+
+WhatsApp's `wa.me` chat links can only pre-fill **text**, not attach files —
+there's no URL parameter for that on any platform, and no webpage can push a
+file straight into a specific app. The order message itself already contains
+the full summary (items, totals, shipping address, payment method, and an
+**Order Ref** like `PRT-482913`), so the only thing that ever needs to travel
+as an actual file is a customer's **custom design PNG(s)**. `js/cart.js`
+picks the best available way to get those to WhatsApp with the message when
+a customer taps **"Place Order on WhatsApp"**:
+
+1. **Phones that support sharing files** (`navigator.share` +
+   `navigator.canShare({ files })` — most modern mobile browsers): tapping
+   the button opens the OS's native **share sheet** with the order text and
+   design file(s) already attached together as one share. The customer
+   picks WhatsApp from that sheet, and everything lands in the chat as a
+   single send — this is the only way to get text and a file into WhatsApp
+   together from a webpage. If the customer backs out of the share sheet
+   without picking anything, nothing is sent and the form stays as-is so
+   they can try again.
+
+   WhatsApp attaches a file shared this way as a **Photo** (compressed),
+   not a Document. There's no reliable way to force Document mode through
+   this path: Chrome's Web Share API only allows files whose MIME type is
+   on its own fixed list (images, video, audio, PDF, plain text, a few
+   Office formats) — giving the file a generic type like
+   `application/octet-stream` to try to dodge WhatsApp's Photo handling
+   doesn't work, since Chrome rejects the *share itself* for a type that
+   isn't on that list, so nothing gets shared at all. Full, uncompressed
+   quality is only guaranteed via the manual-attach fallback below.
+2. **Everywhere else** (desktop browsers, carts with no custom design, or if
+   the native share attempt fails for another reason): falls back to
+   opening WhatsApp Web/desktop with the pre-filled text message, and
+   auto-downloading each design PNG so it's ready for the customer to attach
+   manually in the chat that just opened. Downloads are staggered ~500ms
+   apart since browsers can silently block several triggered at once. The
+   confirmation screen reminds the customer to attach it as a **Document**
+   (not Photo) in WhatsApp for full print quality — that choice is made by
+   hand here, and it's the only path where full quality is guaranteed.
+
 ## Customization page
 
 Every product's **Customize** button (shop grid, home page, related

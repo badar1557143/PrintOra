@@ -51,9 +51,11 @@
         <span class="app-total-label">Total</span>
         <span class="app-total-value" id="cz-total">—</span>
       </div>
-      <button id="download-design-btn" class="app-icon-btn hide-mobile" type="button" title="Download my design" aria-label="Download my design">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-      </button>
+      <div class="download-menu-wrap">
+        <button id="download-design-btn" class="app-icon-btn hide-mobile" type="button" title="Download my design" aria-label="Download my design">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        </button>
+      </div>
       <button id="add-to-cart-btn" class="btn btn-outline btn-sm" type="button">Add to Cart</button>
       <button id="buy-now-btn" class="btn btn-accent btn-sm" type="button">Buy Now</button>
     </div>
@@ -74,10 +76,10 @@
         <span>Text</span>
       </button>
 
-      <label class="app-rail-btn" for="tool-upload-image" id="rail-uploads">
+      <button type="button" class="app-rail-btn" id="rail-uploads" data-opens="uploads">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
         <span>Uploads</span>
-      </label>
+      </button>
       <input type="file" id="tool-upload-image" accept="image/*" class="visually-hidden" multiple>
 
       <button type="button" class="app-rail-btn" id="rail-layers" data-opens="edit">
@@ -135,6 +137,25 @@
             <button type="button" id="qty-plus" aria-label="Increase quantity">+</button>
           </div>
         </div>
+      </div>
+
+      <!-- UPLOADS PANEL -->
+      <div class="app-drawer-panel" id="panel-uploads" hidden>
+        <h2 class="app-drawer-title">Uploads</h2>
+        <label class="btn btn-outline btn-block upload-trigger" for="tool-upload-image">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          Upload a file
+        </label>
+        <p class="hint-sm" style="margin:10px 0 12px;">Anything you upload is saved here so you can reuse it later without re-uploading.</p>
+        <p class="notice upload-warning" style="margin:0 0 18px;">
+          📌 Your uploads are saved only on <strong>this device/browser</strong> — not on our server. So:
+          <br>• Switch phones/browsers or clear your data, and they'll be gone.
+          <br>• We keep your last 40 uploads. Older ones get removed to make space for new ones.
+        </p>
+
+        <h3 class="upload-library-title">My Uploads</h3>
+        <p class="upload-library-empty" id="upload-library-empty">Nothing uploaded yet — files you add will show up here.</p>
+        <div class="upload-library-grid" id="upload-library-grid"></div>
       </div>
 
       <!-- EDIT (PROPERTIES / LAYERS) PANEL -->

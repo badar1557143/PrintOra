@@ -527,7 +527,7 @@ p{ margin: 0; }
 
 /* ---------- WhatsApp floating button (every page) ---------- */
 .whatsapp-float{
-  position: fixed; left:22px; bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  position: fixed; right:22px; bottom: calc(22px + env(safe-area-inset-bottom, 0px));
   width:56px; height:56px; border-radius:50%; background:#25D366; color:#fff;
   display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 18px rgba(37,211,102,0.4);
   z-index: 900; transition: transform .15s ease, box-shadow .15s ease;
@@ -535,7 +535,7 @@ p{ margin: 0; }
 .whatsapp-float:hover{ transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 22px rgba(37,211,102,0.5); }
 .whatsapp-float svg{ display:block; }
 @media (max-width:900px){
-  .whatsapp-float{ width:50px; height:50px; left:16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .whatsapp-float{ width:50px; height:50px; right:16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
 }
 /* customize.html pins a Print Sides bar to the bottom on mobile — keep the bubble clear of it */
 body.app-page .whatsapp-float{ bottom: calc(148px + env(safe-area-inset-bottom, 0px)); }
@@ -548,6 +548,23 @@ body.app-page .whatsapp-float{ bottom: calc(148px + env(safe-area-inset-bottom, 
 }
 .btn-whatsapp:hover{ background:#1DA851; border-color:#1DA851; color:#fff; }
 .btn-whatsapp svg{ flex-shrink:0; }
+
+/* Download-design format menu (Studio topbar + cart items) */
+.download-menu-wrap{ position:relative; display:inline-block; }
+.download-menu{
+  position:absolute; top:calc(100% + 6px); right:0; z-index:60;
+  background:var(--paper-raised); border:1px solid var(--line); border-radius:var(--radius-m);
+  box-shadow:0 10px 28px rgba(21,23,27,0.16); min-width:190px; overflow:hidden; display:none;
+}
+.download-menu.open{ display:block; }
+.download-menu button{
+  display:block; width:100%; text-align:left; padding:10px 14px; background:none; border:none;
+  border-bottom:1px solid var(--line); font:inherit; font-size:14px; color:var(--ink); cursor:pointer;
+}
+.download-menu button:last-child{ border-bottom:none; }
+.download-menu button:hover{ background:var(--paper-dark); }
+.download-menu button small{ display:block; color:var(--grey); font-size:12px; margin-top:2px; }
+.ci-download-wrap{ display:inline-block; position:relative; }
 
 
 /* ---------- Page hero (interior pages) ---------- */
@@ -824,6 +841,8 @@ body.app-page .whatsapp-float{ bottom: calc(148px + env(safe-area-inset-bottom, 
 .ci-opts{ font-size:0.85rem; color: var(--grey); margin-bottom:8px; }
 .ci-remove{ background:none; border:none; color: var(--grey); font-size:0.85rem; text-decoration:underline; }
 .ci-remove:hover{ color: var(--stamp); }
+.ci-download{ background:none; border:none; color: var(--grey); font-size:0.85rem; text-decoration:underline; margin-left:14px; }
+.ci-download:hover{ color: var(--cobalt); }
 .ci-price{ text-align:right; font-weight:700; }
 .summary-card{ background: var(--paper-raised); border:1px solid var(--line); border-radius: var(--radius-m); padding: var(--space-6); position:sticky; top:100px; }
 .summary-row{ display:flex; justify-content:space-between; margin-bottom: var(--space-3); font-size:0.95rem; color: var(--ink-soft); }
@@ -1037,7 +1056,7 @@ input, select, textarea{ max-width: 100%; }
   padding-right: max(var(--space-5), env(safe-area-inset-right));
 }
 .site-footer{ padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); }
-#toast{ bottom: calc(24px + env(safe-area-inset-bottom)); }
+#toast{ bottom: calc(92px + env(safe-area-inset-bottom)); }
 
 /* =========================================================
    1. Ultra-wide screens — let the grid breathe on 2K/4K
@@ -1170,7 +1189,7 @@ input, select, textarea{ max-width: 100%; }
   .section-cta .btn{ width: 100%; }
   .footer-bottom{ flex-direction: column; align-items: flex-start; }
 
-  #toast{ left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); }
+  #toast{ left: 16px; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom)); }
 }
 
 /* =========================================================
@@ -1254,6 +1273,7 @@ input, select, textarea{ max-width: 100%; }
   .hamburger{ min-width: 44px; min-height: 44px; }
   .pc-wishlist{ width: 40px; height: 40px; }
   .ci-remove{ padding: 6px 0; }
+  .ci-download{ padding: 6px 0; }
   .accordion-head{ padding: var(--space-4) 0; min-height: 48px; }
 }
 
@@ -1460,6 +1480,25 @@ body.app-page{
 .app-drawer-panel{ padding-top: var(--space-2); }
 .app-drawer-title{ font-size:1.05rem; margin-bottom: var(--space-4); padding-right: var(--space-7); }
 .app-drawer-footnote{ margin-top: var(--space-5); }
+
+.upload-trigger{ display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; }
+.upload-library-title{ font-size:0.85rem; text-transform:uppercase; letter-spacing:.04em; color: var(--grey); margin-bottom: var(--space-2); }
+.upload-library-empty{ font-size:0.85rem; color: var(--grey); }
+.upload-library-grid{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap: var(--space-2);
+}
+.upload-lib-item{
+  position:relative; aspect-ratio:1; border-radius:var(--radius-s); overflow:hidden;
+  border:1px solid var(--line); background: var(--paper-dark); padding:0;
+}
+.upload-lib-item img{ width:100%; height:100%; object-fit:cover; display:block; cursor:pointer; }
+.upload-lib-item:hover{ border-color: var(--cobalt); }
+.upload-lib-remove{
+  position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:999px; border:none;
+  background:rgba(21,23,27,0.65); color:#fff; font-size:13px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.upload-lib-remove:hover{ background: var(--stamp); }
 
 .cz-card-mini{
   display:flex; gap: var(--space-3); align-items:center; padding: var(--space-4) 0; margin-bottom: var(--space-4);

@@ -35,6 +35,138 @@ function initWhatsAppFloat(){
   document.body.appendChild(a);
 }
 
+/* ---------- Design file downloads (PNG / JPG / TIFF) ---------- */
+// Shared by the Design Studio and the cart's "Download Design" menu. Print
+// shops expect PNG (transparent), JPG (flattened, no transparency), or TIFF
+// (uncompressed, high quality). We only ever start from a transparent PNG,
+// then convert on the fly for the other two.
+
+function triggerFileDownload(href, filename){
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+// Encodes raw RGBA pixel data as an uncompressed baseline TIFF (no external
+// library needed). Keeps the alpha channel, and tags the file at 300 DPI.
+function encodeUncompressedTiff(width, height, rgba){
+  const entries = [
+    [256, 4, 1, width],                 // ImageWidth (LONG)
+    [257, 4, 1, height],                // ImageLength (LONG)
+    [258, 3, 4, null],                  // BitsPerSample (SHORT x4) -> offset filled in below
+    [259, 3, 1, 1],                     // Compression: none
+    [262, 3, 1, 2],                     // PhotometricInterpretation: RGB
+    [273, 4, 1, null],                  // StripOffsets -> offset filled in below
+    [277, 3, 1, 4],                     // SamplesPerPixel (RGBA)
+    [278, 4, 1, height],                // RowsPerStrip
+    [279, 4, 1, rgba.length],           // StripByteCounts
+    [282, 5, 1, null],                  // XResolution -> offset
+    [283, 5, 1, null],                  // YResolution -> offset
+    [296, 3, 1, 2],                     // ResolutionUnit: inches
+    [338, 3, 1, 2]                      // ExtraSamples: unassociated alpha
+  ];
+  const ifdStart = 8;
+  const ifdSize = 2 + entries.length * 12 + 4;
+  const bitsPerSampleOffset = ifdStart + ifdSize;
+  const xResOffset = bitsPerSampleOffset + 8;
+  const yResOffset = xResOffset + 8;
+  const pixelDataOffset = yResOffset + 8;
+  const buffer = new ArrayBuffer(pixelDataOffset + rgba.length);
+  const view = new DataView(buffer);
+
+  view.setUint8(0, 0x49); view.setUint8(1, 0x49); // "II" little-endian
+  view.setUint16(2, 42, true);
+  view.setUint32(4, ifdStart, true);
+
+  let p = ifdStart;
+  view.setUint16(p, entries.length, true); p += 2;
+  entries.forEach(([tag, type, count, value]) => {
+    let v = value;
+    if (tag === 258) v = bitsPerSampleOffset;
+    if (tag === 273) v = pixelDataOffset;
+    if (tag === 282) v = xResOffset;
+    if (tag === 283) v = yResOffset;
+    view.setUint16(p, tag, true); p += 2;
+    view.setUint16(p, type, true); p += 2;
+    view.setUint32(p, count, true); p += 4;
+    view.setUint32(p, v, true); p += 4;
+  });
+  view.setUint32(p, 0, true); // no more IFDs
+
+  [8, 8, 8, 8].forEach((bits, i) => view.setUint16(bitsPerSampleOffset + i * 2, bits, true));
+  view.setUint32(xResOffset, 300, true); view.setUint32(xResOffset + 4, 1, true);
+  view.setUint32(yResOffset, 300, true); view.setUint32(yResOffset + 4, 1, true);
+
+  new Uint8Array(buffer, pixelDataOffset).set(rgba);
+  return new Blob([buffer], { type: "image/tiff" });
+}
+
+// pngDataUrl must be a transparent PNG. format is "png" | "jpg" | "tiff".
+function downloadDesignAsFormat(pngDataUrl, format, filenameBase){
+  if (format === "png"){
+    triggerFileDownload(pngDataUrl, `${filenameBase}.png`);
+    return;
+  }
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+
+    if (format === "jpg"){
+      // JPG has no transparency, so flatten onto white first.
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      triggerFileDownload(canvas.toDataURL("image/jpeg", 0.92), `${filenameBase}.jpg`);
+      return;
+    }
+
+    if (format === "tiff"){
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      const blob = encodeUncompressedTiff(canvas.width, canvas.height, data);
+      const url = URL.createObjectURL(blob);
+      triggerFileDownload(url, `${filenameBase}.tiff`);
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    }
+  };
+  img.src = pngDataUrl;
+}
+
+// Builds (or reuses) the small "PNG / JPG / TIFF" popover menu next to a
+// trigger button. onPick(format) is called with "png" | "jpg" | "tiff".
+function attachDownloadMenu(triggerBtn, wrap, onPick){
+  let menu = wrap.querySelector(".download-menu");
+  if (!menu){
+    menu = document.createElement("div");
+    menu.className = "download-menu";
+    menu.innerHTML = `
+      <button type="button" data-format="png">PNG<small>Transparent background</small></button>
+      <button type="button" data-format="jpg">JPG<small>Flattened, no transparency</small></button>
+      <button type="button" data-format="tiff">TIFF<small>Uncompressed, print quality</small></button>
+    `;
+    wrap.appendChild(menu);
+    menu.querySelectorAll("button[data-format]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.classList.remove("open");
+        onPick(btn.dataset.format);
+      });
+    });
+  }
+  triggerBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.querySelectorAll(".download-menu.open").forEach(m => { if (m !== menu) m.classList.remove("open"); });
+    menu.classList.toggle("open");
+  });
+  document.addEventListener("click", () => menu.classList.remove("open"));
+}
+
 function getCart(){
   try{ return JSON.parse(localStorage.getItem(STORAGE_CART)) || []; }
   catch(e){ return []; }

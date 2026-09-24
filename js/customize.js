@@ -48,33 +48,29 @@ function initCustomizePage(){
   bindOptionControls();
   selectProduct(start, { initial: true });
   initDesignStudio();
+  renderUploadLibrary();
 
   document.getElementById("add-to-cart-btn").addEventListener("click", () => handleAddToCart(false));
   document.getElementById("buy-now-btn").addEventListener("click", () => handleAddToCart(true));
   const downloadBtn = document.getElementById("download-design-btn");
-  if (downloadBtn) downloadBtn.addEventListener("click", handleDownloadDesign);
+  if (downloadBtn){
+    attachDownloadMenu(downloadBtn, downloadBtn.parentElement, handleDownloadDesign);
+  }
 }
 
-// Lets the customer save their design as a PNG so they can attach it in the
-// WhatsApp chat (a wa.me link can only pre-fill text, not attach files).
-function handleDownloadDesign(){
+// Lets the customer save their design as a print file so they can attach it
+// in the WhatsApp chat (a wa.me link can only pre-fill text, not attach files).
+// Exports the artwork only, at 4x resolution, on a transparent background —
+// then downloadDesignAsFormat() converts that into whichever format they pick.
+function handleDownloadDesign(format){
   if (!anySideHasContent()){
     showToast("Add some text or an image to your design first");
     return;
   }
-  buildDesignPreview(currentProduct, (dataUrl) => {
-    if (!dataUrl){
-      showToast("Couldn't generate a download for this design");
-      return;
-    }
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = `${(currentProduct && currentProduct.name || "printoria-design").replace(/\s+/g, "-").toLowerCase()}-design.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    showToast("Design downloaded — attach it to your WhatsApp order");
-  });
+  const pngDataUrl = designCanvas.toDataURL({ format: "png", multiplier: 4 });
+  const base = `${(currentProduct && currentProduct.name || "printoria-design").replace(/\s+/g, "-").toLowerCase()}-design`;
+  downloadDesignAsFormat(pngDataUrl, format, base);
+  showToast(`${format.toUpperCase()} downloaded — attach it to your WhatsApp order`);
 }
 
 /* ---------- Product picker ---------- */
@@ -531,13 +527,59 @@ function collectSidesDesign(){
   return Object.keys(out).length ? out : null;
 }
 
+// Renders every side's saved JSON into an off-screen canvas and exports each as
+// a transparent, high-res PNG — so a design made on the Back (or any side that
+// isn't the one currently open) still gets attached to the cart item, not just
+// whichever side happened to be on screen when "Add to Cart" was clicked.
+function buildAllSideDesignFiles(sidesDesignMap, callback){
+  const ids = Object.keys(sidesDesignMap || {});
+  if (!ids.length){ callback([]); return; }
+  const width = designCanvas.getWidth();
+  const height = designCanvas.getHeight();
+  const results = [];
+  let remaining = ids.length;
+
+  ids.forEach(sideId => {
+    const temp = new fabric.StaticCanvas(null, { width, height });
+    temp.loadFromJSON(sidesDesignMap[sideId], () => {
+      temp.renderAll();
+      const sideDef = currentSides.find(s => s.id === sideId);
+      results.push({ id: sideId, label: (sideDef && sideDef.label) || sideId, dataUrl: temp.toDataURL({ format: "png", multiplier: 4 }) });
+      temp.dispose();
+      remaining -= 1;
+      if (remaining === 0){
+        results.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+        callback(results);
+      }
+    });
+  });
+}
+
 function handleAddToCart(buyNow){
   const p = currentProduct;
   const qty = Number(document.getElementById("pd-qty").value) || 1;
   const hasDesign = anySideHasContent();
   const sidesDesign = collectSidesDesign();
 
-  const finish = (previewDataUrl) => {
+  const finish = (previewDataUrl, designFiles) => {
+    // Save a copy of the customer's design to their own device right when
+    // they add it to the cart / buy now — before the cart write below —
+    // so they already have the file even if they never reach checkout, or
+    // checkout's own attach step doesn't cover their case (e.g. desktop,
+    // where WhatsApp sharing falls back to a manual-attach step anyway).
+    // Staggered a beat apart per file since browsers can silently block
+    // several downloads triggered in the same instant.
+    if (designFiles && designFiles.length){
+      let delay = 0;
+      designFiles.forEach(file => {
+        setTimeout(() => {
+          const base = `${(p.name || "printoria-design").replace(/\s+/g, "-").toLowerCase()}-${file.label.replace(/\s+/g, "-").toLowerCase()}`;
+          triggerFileDownload(file.dataUrl, `${base}.png`);
+        }, delay);
+        delay += 400;
+      });
+    }
+
     addToCart({
       id: p.id,
       name: p.name,
@@ -548,18 +590,35 @@ function handleAddToCart(buyNow){
       customText: hasDesign ? summarizeDesign() : "",
       customDesign: sidesDesign || (hasDesign ? designCanvas.toJSON() : null),
       designPreview: previewDataUrl || null,
+      // Transparent, high-res artwork-only PNG(s) — the actual print file(s), one
+      // per customized side (vs. designPreview above, which is a mockup thumbnail).
+      designFiles: designFiles || [],
       qty: qty
     });
-    showToast(`${p.name} added to cart`);
+    showToast(designFiles && designFiles.length ? `${p.name} added to cart — design saved to your device` : `${p.name} added to cart`);
     if (buyNow){
       window.location.href = "checkout.html";
     }
   };
 
+  const withDesignFiles = (previewDataUrl) => {
+    if (!hasDesign){
+      finish(previewDataUrl, []);
+      return;
+    }
+    if (sidesDesign){
+      // Multi-side product: export every customized side, not just the one on screen.
+      buildAllSideDesignFiles(sidesDesign, (files) => finish(previewDataUrl, files));
+    } else {
+      // Single-canvas product: what's on screen right now is the whole design.
+      finish(previewDataUrl, [{ id: "design", label: "Design", dataUrl: designCanvas.toDataURL({ format: "png", multiplier: 4 }) }]);
+    }
+  };
+
   if (hasDesign){
-    buildDesignPreview(p, finish);
+    buildDesignPreview(p, withDesignFiles);
   } else {
-    finish(null);
+    withDesignFiles(null);
   }
 }
 
@@ -677,30 +736,122 @@ function addTextLayer(){
   commitDesignHistory();
 }
 
+// Places an image (from a data URL) onto the active canvas — shared by a fresh
+// upload and by re-using something from the saved Upload Library.
+function placeImageOnCanvas(dataUrl){
+  if (!designCanvas){
+    showToast("Design Studio isn't ready yet");
+    return;
+  }
+  fabric.Image.fromURL(dataUrl, (img) => {
+    const maxDim = Math.min(designCanvas.getWidth(), designCanvas.getHeight()) * 0.55;
+    const largestSide = Math.max(img.width || maxDim, img.height || maxDim);
+    const scale = Math.min(1, maxDim / largestSide);
+    img.set({
+      left: designCanvas.getWidth() / 2,
+      top: designCanvas.getHeight() / 2,
+      originX: "center",
+      originY: "center",
+      scaleX: scale,
+      scaleY: scale
+    });
+    designCanvas.add(img);
+    designCanvas.setActiveObject(img);
+    designCanvas.requestRenderAll();
+    refreshLayersList();
+    commitDesignHistory();
+  });
+}
+
 function addImageLayer(file){
   if (!file || !file.type || file.type.indexOf("image") !== 0) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    fabric.Image.fromURL(ev.target.result, (img) => {
-      const maxDim = Math.min(designCanvas.getWidth(), designCanvas.getHeight()) * 0.55;
-      const largestSide = Math.max(img.width || maxDim, img.height || maxDim);
-      const scale = Math.min(1, maxDim / largestSide);
-      img.set({
-        left: designCanvas.getWidth() / 2,
-        top: designCanvas.getHeight() / 2,
-        originX: "center",
-        originY: "center",
-        scaleX: scale,
-        scaleY: scale
-      });
-      designCanvas.add(img);
-      designCanvas.setActiveObject(img);
-      designCanvas.requestRenderAll();
-      refreshLayersList();
-      commitDesignHistory();
-    });
+    addToUploadLibrary(ev.target.result, file.name);
+    placeImageOnCanvas(ev.target.result);
   };
   reader.readAsDataURL(file);
+}
+
+/* ---------- Upload Library ----------
+   Every file a customer uploads is also kept in localStorage (per-device, not
+   per-account — there's no backend here) so they can reuse it in a later
+   session or on a different side/product without re-uploading. */
+const STORAGE_UPLOAD_LIBRARY = "printoria_upload_library";
+const UPLOAD_LIBRARY_MAX = 40;
+
+function getUploadLibrary(){
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_UPLOAD_LIBRARY) || "[]");
+  } catch (e){
+    return [];
+  }
+}
+
+function saveUploadLibrary(library){
+  try {
+    localStorage.setItem(STORAGE_UPLOAD_LIBRARY, JSON.stringify(library));
+    return true;
+  } catch (e){
+    return false; // quota exceeded
+  }
+}
+
+function addToUploadLibrary(dataUrl, name){
+  let library = getUploadLibrary();
+  if (library.some(item => item.dataUrl === dataUrl)) return; // already saved
+  library.unshift({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    dataUrl,
+    name: name || "Upload"
+  });
+  if (library.length > UPLOAD_LIBRARY_MAX) library = library.slice(0, UPLOAD_LIBRARY_MAX);
+  // If storage is full, drop the oldest entries until it fits.
+  let droppedForSpace = false;
+  while (library.length && !saveUploadLibrary(library)){
+    library.pop();
+    droppedForSpace = true;
+  }
+  if (droppedForSpace) showToast("Storage full — removed your oldest upload to make space");
+  renderUploadLibrary();
+}
+
+function removeFromUploadLibrary(id){
+  saveUploadLibrary(getUploadLibrary().filter(item => item.id !== id));
+  renderUploadLibrary();
+}
+
+function escAttr(s){
+  return String(s || "").replace(/"/g, "&quot;");
+}
+
+function renderUploadLibrary(){
+  const grid = document.getElementById("upload-library-grid");
+  const empty = document.getElementById("upload-library-empty");
+  if (!grid) return;
+  const library = getUploadLibrary();
+  if (empty) empty.style.display = library.length ? "none" : "block";
+
+  grid.innerHTML = library.map(item => `
+    <div class="upload-lib-item" data-id="${item.id}" title="${escAttr(item.name)}">
+      <img src="${item.dataUrl}" alt="${escAttr(item.name)}">
+      <button type="button" class="upload-lib-remove" data-id="${item.id}" aria-label="Remove ${escAttr(item.name)} from library">×</button>
+    </div>
+  `).join("");
+
+  grid.querySelectorAll(".upload-lib-item img").forEach(img => {
+    img.addEventListener("click", () => {
+      const id = img.closest(".upload-lib-item").dataset.id;
+      const item = getUploadLibrary().find(i => i.id === id);
+      if (item) placeImageOnCanvas(item.dataUrl);
+    });
+  });
+  grid.querySelectorAll(".upload-lib-remove").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      removeFromUploadLibrary(btn.dataset.id);
+    });
+  });
 }
 
 /* ---------- Selection + property panel ---------- */

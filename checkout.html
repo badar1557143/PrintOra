@@ -55,11 +55,14 @@
       <div id="checkout-confirmation" style="display:none;text-align:center;padding:60px 0;">
         <h2>Order sent on WhatsApp</h2>
         <p style="color:var(--ink-soft);max-width:52ch;margin:16px auto 28px;">
-          Your order details opened in WhatsApp — send that message and our team will confirm the total,
-          delivery, and payment with you directly there.
+          Your order details opened in WhatsApp<span id="confirmation-design-note"></span>.
+          Our team will confirm the total, delivery, and payment with you directly there.
         </p>
         <a href="index.html" class="btn btn-accent">Back to Home</a>
       </div>
+      <!-- On phones that support sharing files, initCheckoutPage() (js/cart.js)
+           rewrites the heading/paragraph above in place for the "shared via
+           the OS share sheet" outcome — see tryNativeOrderShare(). -->
 
       <div class="checkout-layout" id="checkout-form-wrap">
         <form id="checkout-form">

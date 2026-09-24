@@ -85,7 +85,6 @@ function initProductPage(){
       sizeWrap.querySelectorAll(".pill").forEach(pl => pl.classList.remove("selected"));
       pill.classList.add("selected");
       selectedSize = pill.dataset.size;
-      updateBuyWhatsAppLink();
     });
   });
 
@@ -93,11 +92,9 @@ function initProductPage(){
   const qtyInput = document.getElementById("pd-qty");
   document.getElementById("qty-minus").addEventListener("click", () => {
     qtyInput.value = Math.max(1, Number(qtyInput.value) - 1);
-    updateBuyWhatsAppLink();
   });
   document.getElementById("qty-plus").addEventListener("click", () => {
     qtyInput.value = Number(qtyInput.value) + 1;
-    updateBuyWhatsAppLink();
   });
 
   // Accordions
@@ -121,28 +118,7 @@ function initProductPage(){
   document.getElementById("add-to-cart-btn").addEventListener("click", () => handleAddToCart(false));
   document.getElementById("buy-now-btn").addEventListener("click", () => handleAddToCart(true));
 
-  // Buy on WhatsApp — opens a chat with the product + chosen options prefilled,
-  // so the customer can confirm and order without going through the cart at all.
-  updateBuyWhatsAppLink();
-  document.getElementById("pd-qty").addEventListener("change", updateBuyWhatsAppLink);
-
   renderRelated(p);
-}
-
-function updateBuyWhatsAppLink(){
-  const btn = document.getElementById("buy-whatsapp-btn");
-  if (!btn || !currentProduct) return;
-  const p = currentProduct;
-  const qty = Number(document.getElementById("pd-qty").value) || 1;
-  const lines = [
-    `Hi! I'd like to order:`,
-    `${p.name} (Qty: ${qty})`,
-    selectedColor ? `Color: ${selectedColor}` : null,
-    selectedSize ? `Size: ${selectedSize}` : null,
-    `Price: ${formatPrice(p.price)} each`,
-    window.location.href
-  ].filter(Boolean);
-  btn.href = whatsappLink(lines.join("\n"));
 }
 
 function selectColor(color){
@@ -158,7 +134,6 @@ function selectColor(color){
       b.classList.toggle("active", b.dataset.src === src);
     });
   }
-  updateBuyWhatsAppLink();
 }
 
 function handleAddToCart(buyNow){
