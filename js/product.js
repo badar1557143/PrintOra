@@ -30,8 +30,6 @@ function initProductPage(){
   setMetaContent("og-description", metaDesc);
   setMetaContent("og-image", absoluteAssetURL(seo.ogImage || p.image));
   setMetaTag("og:url", window.location.href);
-  const canonicalLink = document.getElementById("canonical-link");
-  if (canonicalLink) canonicalLink.href = seo.canonicalURL || window.location.href;
   injectProductSchema(p, seo, metaDesc);
 
   // Breadcrumb — links to this product's category instead of the generic Shop page

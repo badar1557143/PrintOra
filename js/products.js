@@ -8,76 +8,27 @@ const PRODUCTS = [
   {
     id: 1,
     name: "Classic Custom T-Shirt",
-    slug: "custom-printed-cotton-t-shirt",
     seoTitle: "Custom Printed Cotton T-Shirt – Design Your Own | PrintOria",
     seo: {
       h1: "Custom Printed Cotton T-Shirt – Design Your Own",
-      metaDescription: "Design your own custom printed cotton T-shirt with PrintOria. Choose your color and size, then add your photo, logo, artwork, name, or text.",
-      canonicalURL: "https://badar1557143.github.io/PrintOra/custom-printed-cotton-t-shirt/",
-      keywords: ["custom printed cotton t-shirt", "custom t-shirt", "custom printed t-shirt", "design your own t-shirt", "personalized t-shirt", "custom cotton t-shirt", "custom t-shirt with photo", "custom t-shirt with logo", "custom t-shirt Pakistan"],
+      metaDescription: "Design your own custom printed cotton T-shirt with PrintOria. Soft ringspun cotton, 7 colors, sizes S–XXL. Upload a photo, name, or artwork — front or back.",
       breadcrumbName: "Custom Printed Cotton T-Shirt",
       ogImage: "assets/products/tee-plain-white.webp",
-      imageAltBase: "Custom printed cotton t-shirt",
-      featuresHTML: "Create a T-shirt that is made just for you. Upload your <strong>photo, artwork, logo, name, or text</strong> and create your own custom T-shirt with PrintOria." +
-        "<p style=\"margin:12px 0 0;\">Made from <strong>100% cotton</strong>, this T-shirt is soft, lightweight, and comfortable for everyday wear. Choose your favorite color and size, then add your design to the front, back.</p>" +
-        "<h4 style=\"margin:16px 0 4px;\">Product Features</h4>" +
+      imageAltBase: "Custom printed cotton T-shirt",
+      featuresHTML: "Turn a plain tee into something that's actually yours. This custom printed cotton T-shirt is made on soft ringspun cotton and printed to order — upload a photo, your own artwork, a name, or a message, and print it on the front, the back, or both." +
         "<ul style=\"margin:10px 0 0;padding-left:18px;\">" +
-
-        "<li>100% cotton</li>" +
-        "<li>Soft and comfortable fabric</li>" +
-        "<li>Lightweight <strong>150–160 GSM</strong></li>" +
-        "<li>Pre-shrunk fabric</li>" +
-        "<li>Comfortable everyday fit</li>" +
-        "<li>Side-seamed construction</li>" +
-        "<li>Shoulder-to-shoulder taping</li>" +
-        "<li>Available in multiple colors</li>" +
-        "<li>Sizes <strong>S to XXL</strong></li>" +
-        "</ul>" +
-        "<h4 style=\"margin:16px 0 4px;\">Create Your Own T-Shirt</h4>" +
-        "<p style=\"margin:0 0 6px;\">Personalize your T-shirt in a few simple steps:</p>" +
-        "<ol style=\"margin:0 0 10px;padding-left:18px;\">" +
-        "<li>Choose your <strong>color and size</strong>.</li>" +
-        "<li>Upload your <strong>photo, logo, artwork, name, or text</strong>.</li>" +
-        "<li>Choose where you want your design printed.</li>" +
-        "<li>Check your design.</li>" +
-        "<li>Place your order.</li>" +
-        "</ol>" +
-        "<p style=\"margin:0 0 10px;\">Your custom T-shirt is then prepared especially for your order.</p>" +
-        "<h4 style=\"margin:16px 0 4px;\">Printing Prices</h4>" +
-        "<table style=\"width:100%;border-collapse:collapse;font-size:0.92rem;margin:6px 0 10px;\">" +
-        "<tr><td style=\"padding:4px 0;\">Front Print</td><td style=\"padding:4px 0;text-align:right;\">Rs. 200</td></tr>" +
-        "<tr><td style=\"padding:4px 0;\">Back Print</td><td style=\"padding:4px 0;text-align:right;\">Rs. 200</td></tr>" +
-        "<tr><td style=\"padding:4px 0;\">Custom Packaging</td><td style=\"padding:4px 0;text-align:right;\">Rs. 100</td></tr>" +
-        "</table>" +
-        "<p style=\"margin:0 0 10px;\">You can choose the printing options you need when creating your T-shirt.</p>" +
-        "<h4 style=\"margin:16px 0 4px;\">Available Colors</h4>" +
-        "<p style=\"margin:0 0 10px;\">White, Black, Navy, Sky Blue, Mustard, Beige, and Brown.</p>" +
-        "<h4 style=\"margin:16px 0 4px;\">Made to Order</h4>" +
-        "<p style=\"margin:0 0 6px;\">Your T-shirt is made after you place your order. This helps reduce unnecessary overproduction because products are not made in large quantities before they are ordered.</p>" +
-        "<p style=\"margin:0 0 10px;\">Since your product is prepared after ordering, it may take a little longer to process before shipping.</p>" +
-        "<h4 style=\"margin:16px 0 4px;\">Please Note</h4>" +
-        "<p style=\"margin:0 0 10px;\">The product is manufactured using leftover material. Because of this, <strong>small differences in appearance or quality may sometimes occur</strong>.</p>" +
-        "<h4 style=\"margin:16px 0 4px;\">Product Details</h4>" +
-        "<table style=\"width:100%;border-collapse:collapse;font-size:0.92rem;margin:6px 0 10px;\">" +
-        "<tr><td style=\"padding:4px 0;color:var(--grey);\">Material</td><td style=\"padding:4px 0;text-align:right;\">100% Cotton</td></tr>" +
-        "<tr><td style=\"padding:4px 0;color:var(--grey);\">Fabric Weight</td><td style=\"padding:4px 0;text-align:right;\">150–160 GSM</td></tr>" +
-        "<tr><td style=\"padding:4px 0;color:var(--grey);\">Sizes</td><td style=\"padding:4px 0;text-align:right;\">S–XXL</td></tr>" +
-        "<tr><td style=\"padding:4px 0;color:var(--grey);\">Weight</td><td style=\"padding:4px 0;text-align:right;\">0.3 kg</td></tr>" +
-        "<tr><td style=\"padding:4px 0;color:var(--grey);\">Dimensions</td><td style=\"padding:4px 0;text-align:right;\">47 × 31 × 2 cm</td></tr>" +
-        "<tr><td style=\"padding:4px 0;color:var(--grey);\">Product Type</td><td style=\"padding:4px 0;text-align:right;\">Custom Printed T-Shirt</td></tr>" +
-        "<tr><td style=\"padding:4px 0;color:var(--grey);\">Made For</td><td style=\"padding:4px 0;text-align:right;\">Everyday Wear</td></tr>" +
-        "</table>" +
-        "<h4 style=\"margin:16px 0 4px;\">Design It. Wear It. Make It Yours.</h4>" +
-        "<p style=\"margin:0;\">Create a custom cotton T-shirt with your own design, photo, logo, name, or artwork and make something that is uniquely yours.</p>",
-      materials: "100% cotton, 150–160 GSM, pre-shrunk, side-seamed with shoulder-to-shoulder taping. Made using leftover material, so small differences in appearance or quality may occur.",
+        "<li>Soft ringspun cotton, printed to order</li>" +
+        "<li>Front print, back print, or both (Rs. 200 per side)</li>" +
+        "<li>7 colors: White, Black, Navy, Sky Blue, Mustard, Beige, Brown</li>" +
+        "<li>Sizes S–XXL — see the Size Guide below for exact measurements</li>" +
+        "<li>Upload your own photo, artwork, name, or message in the Design Studio</li>" +
+        "</ul>",
+      materials: "Soft ringspun cotton, printed to order.",
       faq: [
-        { q: "What material is this shirt made from?", a: "100% cotton, 150–160 GSM, pre-shrunk and side-seamed with shoulder-to-shoulder taping." },
+        { q: "What material is this shirt made from?", a: "Soft ringspun cotton, printed to order." },
         { q: "Can I print on both the front and back?", a: "Yes — front and back printing are each Rs. 200, added when you build your design in the Design Studio." },
-        { q: "Can I add custom packaging?", a: "Yes — custom packaging is available for Rs. 100 and can be added when you place your order." },
         { q: "What sizes are available?", a: "S, M, L, XL, and XXL. Check the Size Guide above for exact chest, length, shoulder, and sleeve measurements in inches." },
-        { q: "How long does production take?", a: "Because every shirt is made to order, production takes a little longer to process before it ships." },
-        { q: "Why might my shirt look slightly different from the photos?", a: "This product is manufactured using leftover material, so small differences in appearance or quality may sometimes occur." },
-        { q: "Do you ship this personalized t-shirt across Pakistan?", a: "Yes — this custom t-shirt is available for order and delivery across Pakistan." },
+        { q: "How long does production take?", a: "Because every shirt is made to order, production takes 2–4 days before it ships." },
         { q: "Can I return a custom T-shirt?", a: "Since each shirt is personalized, returns are accepted only if it arrives damaged or incorrect." }
       ]
     },
@@ -128,8 +79,8 @@ const PRODUCTS = [
       "assets/products/tee-plain-beige.webp",
       "assets/products/tee-plain-brown.webp"
     ],
-    description: "Create a T-shirt with your own design. 100% cotton, 150–160 GSM, printed to order with your name, photo, or artwork.",
-    tags: ["shirt", "apparel", "custom", "cotton", "custom t-shirt", "personalized t-shirt", "design your own t-shirt", "custom t-shirt with photo", "custom t-shirt with logo", "custom t-shirt pakistan"],
+    description: "Create a T-shirt with your own design. Soft ringspun cotton, printed to order with your name, photo, or artwork.",
+    tags: ["shirt", "apparel", "custom", "cotton"],
     colors: ["White", "Black", "Navy", "Sky Blue", "Mustard", "Beige", "Brown"],
     sizes: ["S", "M", "L", "XL", "XXL"],
     // Print Sides — the Design Studio (customize.html) shows one card per side.
@@ -415,12 +366,6 @@ function getEffectiveSides(p){
 /* Link to the customization page with a product pre-selected */
 function customizeURL(id){
   return "customize.html?id=" + encodeURIComponent(id);
-}
-
-/* Link to a product's detail page — uses its clean SEO slug (e.g. "custom-printed-cotton-t-shirt/")
-   when the product has one, falling back to the generic ?id= route otherwise. */
-function productURL(p){
-  return p.slug ? p.slug + "/" : "product.html?id=" + encodeURIComponent(p.id);
 }
 
 /* Preview photo for a chosen color (falls back to the product's main photo when it has no per-color photos) */
