@@ -313,13 +313,13 @@ function productCardHTML(p){
   return `
     <article class="product-card reveal">
       <div class="pc-media">
-        <a href="product.html?id=${p.id}" aria-label="View ${p.name}">
+        <a href="${productURL(p)}" aria-label="View ${p.name}">
           <img src="${p.image}" alt="${p.name}" loading="lazy" width="400" height="400">
         </a>
         <button class="pc-wishlist ${isWishlisted ? "active" : ""}" data-id="${p.id}" aria-label="Add to wishlist" aria-pressed="${isWishlisted}">
           <svg viewBox="0 0 24 24" fill="${isWishlisted ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-10-9.3C.4 8 2 4.5 5.6 4.1c2-.2 3.7.8 4.9 2.4C11.7 4.9 13.4 3.9 15.4 4.1 19 4.5 20.6 8 20 11.7 17.5 16.4 12 21 12 21z"/></svg>
         </button>
-        <a class="pc-quick" href="product.html?id=${p.id}">Quick View</a>
+        <a class="pc-quick" href="${productURL(p)}">Quick View</a>
       </div>
       <div class="pc-body">
         <span class="pc-cat">${p.category}</span>
@@ -329,7 +329,7 @@ function productCardHTML(p){
         <div class="pc-footer">
           <span class="pc-price">${priceHTML}</span>
           ${p.customizable === false
-            ? `<a href="product.html?id=${p.id}" class="btn btn-outline btn-sm">View</a>`
+            ? `<a href="${productURL(p)}" class="btn btn-outline btn-sm">View</a>`
             : `<a href="${customizeURL(p.id)}" class="btn btn-outline btn-sm">Customize</a>`}
         </div>
       </div>

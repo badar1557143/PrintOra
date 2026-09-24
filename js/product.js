@@ -19,13 +19,31 @@ function initProductPage(){
   selectedColor = p.colors[0];
   selectedSize = p.sizes[0];
 
-  document.title = `${p.name} | PRINTORIA`;
-  document.getElementById("breadcrumb-name").textContent = p.name;
+  document.title = p.seoTitle || `${p.name} | PRINTORIA`;
+
+  // Meta description, Open Graph, and JSON-LD — use per-product overrides where set,
+  // fall back to generic values built from the product data for every other product.
+  const seo = p.seo || {};
+  const metaDesc = seo.metaDescription || p.description;
+  setMetaContent("meta-description", metaDesc);
+  setMetaContent("og-title", p.seoTitle || `${p.name} | PRINTORIA`);
+  setMetaContent("og-description", metaDesc);
+  setMetaContent("og-image", absoluteAssetURL(seo.ogImage || p.image));
+  setMetaTag("og:url", window.location.href);
+  const canonicalLink = document.getElementById("canonical-link");
+  if (canonicalLink) canonicalLink.href = seo.canonicalURL || window.location.href;
+  injectProductSchema(p, seo, metaDesc);
+
+  // Breadcrumb — links to this product's category instead of the generic Shop page
+  const breadcrumbCat = document.getElementById("breadcrumb-cat");
+  breadcrumbCat.textContent = p.category;
+  breadcrumbCat.href = `shop.html?category=${encodeURIComponent(p.category)}`;
+  document.getElementById("breadcrumb-name").textContent = seo.breadcrumbName || p.name;
 
   // Gallery — for products with per-color photos the gallery and the color swatches stay in sync
   const mainImg = document.getElementById("gallery-main-img");
   mainImg.src = getColorImage(p, selectedColor);
-  mainImg.alt = p.name;
+  mainImg.alt = seo.imageAltBase ? `${seo.imageAltBase} in ${selectedColor}` : p.name;
   if (p.colorImages) mainImg.parentElement.classList.add("gallery-tall");
   const thumbsWrap = document.getElementById("gallery-thumbs");
   thumbsWrap.classList.toggle("many", p.gallery.length > 6); // 7 color views fit on one row
@@ -48,14 +66,42 @@ function initProductPage(){
 
   // Text fields
   document.getElementById("pd-cat").textContent = p.category;
-  document.getElementById("pd-title").textContent = p.name;
+  document.getElementById("pd-title").textContent = seo.h1 || p.name;
   document.getElementById("pd-rating-stars").textContent = starString(p.rating);
   document.getElementById("pd-rating-text").textContent = `${p.rating} (${p.reviews} reviews)`;
   document.getElementById("pd-desc").textContent = p.description;
   document.getElementById("pd-price").textContent = formatPrice(p.price);
+
   if (p.oldPrice){
     document.getElementById("pd-old-price").textContent = formatPrice(p.oldPrice);
     document.getElementById("pd-old-price").style.display = "inline";
+  }
+
+  // Size Guide — show the t-shirt size chart for T-Shirts, keep the generic note for everything else
+  const sizeGuideBody = document.getElementById("size-guide-body");
+  if (sizeGuideBody){
+    if (p.category === "T-Shirts"){
+      sizeGuideBody.innerHTML = `
+        All measurements are in inches. Not sure which size to pick? Compare your favorite tee against the chart below.
+        <img class="size-guide-img" src="assets/images/size-chart-mens-tshirt.webp" alt="T-shirt size chart in inches — chest, length, shoulder and sleeve measurements for sizes S, M, L, XL and XXL" width="720" height="720" loading="lazy">
+      `;
+    } else {
+      sizeGuideBody.textContent = "Refer to the size options above. Contact us if you'd like help choosing the right fit.";
+    }
+  }
+
+  // Description & Features, Materials, FAQ — use per-product overrides where set,
+  // otherwise leave the generic copy that's already in the HTML.
+  if (seo.featuresHTML){
+    document.getElementById("desc-features-body").innerHTML = seo.featuresHTML;
+  }
+  if (seo.materials){
+    document.getElementById("materials-body").textContent = seo.materials;
+  }
+  if (seo.faq && seo.faq.length){
+    document.getElementById("faq-body").innerHTML = seo.faq.map(item => `
+      <p style="margin:0 0 10px;"><strong>${item.q}</strong><br>${item.a}</p>
+    `).join("");
   }
 
   // "Customize This Product" -> customization page with this product pre-selected
@@ -164,6 +210,66 @@ function renderRelated(p){
   const fallback = related.length ? related : PRODUCTS.filter(x => x.id !== p.id).slice(0, 4);
   wrap.innerHTML = fallback.map(productCardHTML).join("");
   bindWishlistButtons(wrap);
+}
+
+/* ---------- SEO helpers ---------- */
+
+// Set the content of a <meta id="..."> tag already present in the page head.
+function setMetaContent(id, content){
+  const tag = document.getElementById(id);
+  if (tag) tag.setAttribute("content", content);
+}
+
+// Set (or create) a <meta property="..."> tag that has no fixed id in the HTML — used for
+// og:url, which is different on every load and so isn't hardcoded into product.html.
+function setMetaTag(property, content){
+  let tag = document.querySelector(`meta[property="${property}"]`);
+  if (!tag){
+    tag = document.createElement("meta");
+    tag.setAttribute("property", property);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute("content", content);
+}
+
+// Resolve a project-relative asset path (e.g. "assets/products/tee-plain-white.webp")
+// to an absolute URL, since Open Graph and JSON-LD image URLs must be absolute.
+function absoluteAssetURL(relativePath){
+  return new URL(relativePath, window.location.href).href;
+}
+
+// Build and inject (or update) the Product JSON-LD schema for the currently loaded product.
+function injectProductSchema(p, seo, metaDesc){
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": seo.h1 || p.name,
+    "description": metaDesc,
+    "image": [absoluteAssetURL(seo.ogImage || p.image)],
+    "brand": { "@type": "Brand", "name": "PrintOria" },
+    "category": p.category,
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": String(p.rating),
+      "reviewCount": String(p.reviews)
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "PKR",
+      "price": String(p.price),
+      "availability": "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    }
+  };
+  let script = document.getElementById("product-schema");
+  if (!script){
+    script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "product-schema";
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(schema);
 }
 
 document.addEventListener("DOMContentLoaded", initProductPage);

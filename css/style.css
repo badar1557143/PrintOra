@@ -728,6 +728,7 @@ body.app-page .whatsapp-float{ bottom: calc(148px + env(safe-area-inset-bottom, 
 .accordion-item.open .chev{ transform: rotate(45deg); }
 .accordion-body{ max-height:0; overflow:hidden; transition: max-height .25s ease; color: var(--ink-soft); font-size:0.92rem; }
 .accordion-item.open .accordion-body{ padding-bottom: var(--space-4); }
+.size-guide-img{ display:block; width:100%; max-width:340px; height:auto; border-radius: var(--radius-m); border:1px solid var(--line); margin-top: var(--space-3); }
 
 @media (max-width:900px){ .product-detail{ grid-template-columns:1fr; } }
 
